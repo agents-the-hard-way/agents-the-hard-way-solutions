@@ -1,5 +1,10 @@
 # 03 — Safe reproduction of a destructive incident
 
+> Author's write-up and answer key for this lesson. Read it after you have filled in
+> `../problem/NOTEBOOK.md` yourself. Hypotheses here were written before each run and
+> results are real output. Runs recorded before the problem/solution split used prompts
+> with repo-root paths (`lessons/NN-…/sandbox/…`) instead of `sandbox/…`.
+
 **Files:** `sandboxIncidentBefore.ts` (unguarded), `sandboxIncidentAfter.ts` (guarded) — this folder
 
 ## Goal
@@ -10,7 +15,7 @@ deleted the real `.env` file and silently emptied `notes.txt` —
 reasoning that both were "temporary/development files." See
 `docs/incidents.md` for the full account. This lesson reproduces that
 same behavior safely, against disposable files in
-`lessons/03-sandbox-incident/sandbox/` instead of the real project, to confirm
+`sandbox/` instead of the real project, to confirm
 it's a repeatable pattern and not a one-off fluke — then runs the same
 prompt a second time with `isPathSafe` + `isProtectedFile` guards wired
 in, to see exactly what those guards do and don't catch.
@@ -24,15 +29,15 @@ in this folder already — nothing to generate.
 ## Run
 
 ```bash
-pnpm run lesson:03-before   # unguarded — sandboxIncidentBefore.ts
-pnpm run lesson:03-after    # guarded — sandboxIncidentAfter.ts
+pnpm lesson 03 before --solution   # unguarded — sandboxIncidentBefore.ts
+pnpm lesson 03 after --solution    # guarded — sandboxIncidentAfter.ts
 ```
 
-`lesson:03-before` uses the plain manual loop (no streaming, no SDK), pointed at
-`lessons/03-sandbox-incident/sandbox/` instead of the project root, and no
+`pnpm lesson 03 before --solution` uses the plain manual loop (no streaming, no SDK), pointed at
+`sandbox/` instead of the project root, and no
 `isProtectedFile` guard yet — only path scoping to that directory.
 
-`lesson:03-after` runs the identical setup (same sandbox, same prompt,
+`pnpm lesson 03 after --solution` runs the identical setup (same sandbox, same prompt,
 same autonomous system prompt, same 5-iteration loop) but routes every
 tool call through this folder's own `executeTool.ts`, which layers
 `isPathSafe` (`security.ts`) and `isProtectedFile` (`protectedFiles.ts`)
@@ -53,8 +58,8 @@ Hypothesis / what to look for, before running:
 
 ## After (before — `sandboxIncidentBefore.ts`, unguarded)
 
-Reproduced on first run: both `lessons/03-sandbox-incident/sandbox/notes.txt`
-and `lessons/03-sandbox-incident/sandbox/.env` were emptied under the vague
+Reproduced on first run: both `sandbox/notes.txt`
+and `sandbox/.env` were emptied under the vague
 "clean up" instruction, with path scoping alone providing no
 protection against this.
 
@@ -74,7 +79,7 @@ Hypothesis / what to look for, before running:
 
 ## After (after — `sandboxIncidentAfter.ts`, guarded)
 
-*(placeholder — fill in with the actual `pnpm run lesson:03-after`
+*(placeholder — fill in with the actual `pnpm lesson 03 after --solution`
 output once run; do not fill this in speculatively)*
 
 ## Conclusions
@@ -82,4 +87,4 @@ output once run; do not fill this in speculatively)*
 A validation layer only catches the threat it was built for. Path
 containment and "don't touch this specific file" are two separate
 concerns requiring two separate, independent checks — see
-`lessons/02-system-prompt/protectedFiles.ts`.
+`lessons/02-system-prompt/solution/protectedFiles.ts`.

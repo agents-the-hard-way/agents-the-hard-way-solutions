@@ -1,5 +1,10 @@
 # 06 — Prompt Caching
 
+> Author's write-up and answer key for this lesson. Read it after you have filled in
+> `../problem/NOTEBOOK.md` yourself. Hypotheses here were written before each run and
+> results are real output. Runs recorded before the problem/solution split used prompts
+> with repo-root paths (`lessons/NN-…/sandbox/…`) instead of `sandbox/…`.
+
 **Files:** `promptCachingBefore.ts` (no `cache_control`, baseline), `promptCachingAfter.ts`
 (`cache_control` on the system block, plus invalidation tests) — this folder.
 **Helper:** `generateFixtures.ts` (writes `sandbox/knowledge-base.txt`, about 140 KB, deterministic).
@@ -20,7 +25,7 @@ built from measured numbers.
 - Fixtures generated into this lesson's own `sandbox/` (the generated file is gitignored):
 
   ```bash
-  pnpm exec tsx lessons/06-prompt-caching/generateFixtures.ts
+  pnpm lesson 06 fixtures --solution
   ```
 
 - Minimum cacheable prefix for `claude-haiku-4-5-20251001` is **4096 tokens**, per the minimum table
@@ -31,8 +36,8 @@ built from measured numbers.
 ## Run
 
 ```bash
-pnpm run lesson:06-before   # no cache_control — baseline
-pnpm run lesson:06-after    # cache_control on the system block + invalidation tests
+pnpm lesson 06 before --solution   # no cache_control — baseline
+pnpm lesson 06 after --solution    # cache_control on the system block + invalidation tests
 ```
 
 Both run the same knowledge base and the same user question. The only thing that differs is

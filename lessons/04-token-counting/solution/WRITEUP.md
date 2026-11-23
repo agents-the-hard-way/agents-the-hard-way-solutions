@@ -1,5 +1,10 @@
 # 04 — Token Counting & Context Window Limits
 
+> Author's write-up and answer key for this lesson. Read it after you have filled in
+> `../problem/NOTEBOOK.md` yourself. Hypotheses here were written before each run and
+> results are real output. Runs recorded before the problem/solution split used prompts
+> with repo-root paths (`lessons/NN-…/sandbox/…`) instead of `sandbox/…`.
+
 **Files:** `tokenCountingBefore.ts` (logs both token estimates but
 never acts on them), `tokenCountingAfter.ts` (stops before
 `create()` instead of letting the API reject an oversized request) —
@@ -19,17 +24,17 @@ Sandbox fixtures, isolated to this lesson's own subdirectory (never reuse
 `docs/incidents.md`):
 
 ```bash
-pnpm exec tsx lessons/04-token-counting/generateFixtures.ts
+pnpm lesson 04 fixtures --solution
 ```
 
 This writes `access-log-en.txt`, `access-log-pl.txt`, and
-`audit-log-en.txt` into `lessons/04-token-counting/sandbox/`.
+`audit-log-en.txt` into `sandbox/`.
 
 ## Run
 
 ```bash
-pnpm run lesson:04-before   # tokenCountingBefore.ts
-pnpm run lesson:04-after    # tokenCountingAfter.ts
+pnpm lesson 04 before --solution   # tokenCountingBefore.ts
+pnpm lesson 04 after --solution    # tokenCountingAfter.ts
 ```
 
 Both run the identical task against the identical fixtures and log the
@@ -87,7 +92,7 @@ round-trip latency, not money.
 Sandbox: three generated log-style files (`generateFixtures.ts` (this folder))
 — `access-log-en.txt` (4000 lines), `access-log-pl.txt` (4000 lines, same
 data shape in Polish), `audit-log-en.txt` (6000 lines). Task: read all files
-in `lessons/04-token-counting/sandbox/` and write a combined summary.
+in `sandbox/` and write a combined summary.
 
 | Iteration | Heuristic | Actual (countTokens) | Error   |
 |-----------|----------:|----------------------:|--------:|
@@ -140,7 +145,7 @@ Hypothesis / what to look for, before running:
 
 ## After (after — `tokenCountingAfter.ts`)
 
-*(placeholder — fill in with the actual `pnpm run lesson:04-after`
+*(placeholder — fill in with the actual `pnpm lesson 04 after --solution`
 output once run; do not fill this in speculatively)*
 
 ## Conclusions
@@ -164,7 +169,7 @@ output once run; do not fill this in speculatively)*
    against the same file being read into context and resent to the API on
    every subsequent iteration.
 
-6. *(fill in after running `lesson:04-after`: what the guard actually
+6. *(fill in after running `pnpm lesson 04 after --solution`: what the guard actually
    changes, and doesn't)*
 
 ## Next

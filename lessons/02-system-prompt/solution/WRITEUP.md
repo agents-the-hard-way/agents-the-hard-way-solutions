@@ -1,5 +1,10 @@
 # 02 — System prompt as a behavior lever
 
+> Author's write-up and answer key for this lesson. Read it after you have filled in
+> `../problem/NOTEBOOK.md` yourself. Hypotheses here were written before each run and
+> results are real output. Runs recorded before the problem/solution split used prompts
+> with repo-root paths (`lessons/NN-…/sandbox/…`) instead of `sandbox/…`.
+
 **Files:** `systemPromptBefore.ts` (cautious, explain-first prompt),
 `systemPromptAfter.ts` (autonomous, act-without-asking prompt) — this
 folder, both built on the shared `runLoop.ts`
@@ -18,8 +23,8 @@ request/response loop, no streaming involved.
 ## Run
 
 ```bash
-pnpm run lesson:02-before   # cautious, explain-first system prompt
-pnpm run lesson:02-after    # autonomous, act-without-asking system prompt
+pnpm lesson 02 before --solution   # cautious, explain-first system prompt
+pnpm lesson 02 after --solution    # autonomous, act-without-asking system prompt
 ```
 
 Each sends the identical task ("read notes.txt, write a summary")
@@ -53,7 +58,7 @@ Hypothesis / what to look for, before running:
 - With an ambiguous instruction (e.g. "clean up this directory"
   instead of a precise one) instead of this lesson's precise one, this
   variant can diverge sharply — including into destructive territory.
-  See `lessons/03-sandbox-incident/README.md`.
+  See `lessons/03-sandbox-incident/solution/WRITEUP.md`.
 
 ## After (after — `systemPromptAfter.ts`, autonomous system prompt)
 

@@ -1,5 +1,10 @@
 # 05 — Proactive Context Compaction
 
+> Author's write-up and answer key for this lesson. Read it after you have filled in
+> `../problem/NOTEBOOK.md` yourself. Hypotheses here were written before each run and
+> results are real output. Runs recorded before the problem/solution split used prompts
+> with repo-root paths (`lessons/NN-…/sandbox/…`) instead of `sandbox/…`.
+
 **Files:** `contextWindowManagementBefore.ts` (`runWithoutCompaction()`),
 `contextWindowManagementAfter.ts` (`runWithCompaction()`) — this folder,
 both built on the shared `tokenEstimation.ts`
@@ -20,14 +25,14 @@ than only inferring it from lesson 04.
 Lesson 04 completed. Sandbox fixtures, isolated to this lesson:
 
 ```bash
-pnpm exec tsx lessons/05-context-compaction/generateFixtures.ts
+pnpm lesson 05 fixtures --solution
 ```
 
 ## Run
 
 ```bash
-pnpm run lesson:05-before   # runWithoutCompaction() — 15-iteration cap
-pnpm run lesson:05-after    # runWithCompaction() — 10-iteration cap
+pnpm lesson 05 before --solution   # runWithoutCompaction() — 15-iteration cap
+pnpm lesson 05 after --solution    # runWithCompaction() — 10-iteration cap
 ```
 
 Both run the identical task, loop, and thresholds logged
@@ -50,7 +55,7 @@ the cap the way the compacted run does.
 
 ## After (before — `contextWindowManagementBefore.ts`, without compaction)
 
-*(placeholder — fill in with the actual `pnpm run lesson:05-before`
+*(placeholder — fill in with the actual `pnpm lesson 05 before --solution`
 output once run; do not fill this in speculatively)*
 
 ## Before (after — `contextWindowManagementAfter.ts`, with compaction)
@@ -78,7 +83,7 @@ shape as lesson 04, regenerated into this lesson's own sandbox.
 | 9         |   353,022 | 547,532 | reads all 3 again → **compaction fires** → 1,155 tokens |
 | 10        |       810 |   1,274 | `list_files` again — loop cap reached |
 
-**The task never completed.** `lessons/05-context-compaction/sandbox/summary.txt`
+**The task never completed.** `sandbox/summary.txt`
 was never written. The agent repeated the same list → read → compact
 cycle for all 10 iterations. Every compaction summary claimed no prior
 work existed (e.g. *"No prior work has been done on this task"*, *"No
@@ -105,7 +110,7 @@ Root cause and full analysis: `docs/incidents.md`, Incident 6.
    trace of what went wrong). It's an argument that compaction needs
    its own correctness check, not just a token-count check.
 
-5. *(fill in after running `lesson:05-before`: how it compares to the
+5. *(fill in after running `pnpm lesson 05 before --solution`: how it compares to the
    with-compaction run above)*
 
 ## Next

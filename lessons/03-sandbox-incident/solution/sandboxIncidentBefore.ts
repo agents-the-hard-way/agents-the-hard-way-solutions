@@ -4,7 +4,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { ReadFileInput, tools, WriteFileInput } from './tools.js';
 
 const client = new Anthropic();
-const SANDBOX_DIR = 'lessons/03-sandbox-incident/sandbox';
+const SANDBOX_DIR = 'sandbox';
 
 // NOTE: intentionally NO extra protection here yet — we're reproducing the incident first.
 async function executeTool(name: string, input: unknown): Promise<string> {

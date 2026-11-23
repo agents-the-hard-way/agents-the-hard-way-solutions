@@ -1,7 +1,9 @@
 import { mkdir, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const SANDBOX_DIR = process.argv[2] ?? 'lessons/05-context-compaction/sandbox'; // pass a target dir to reuse this generator for other lessons
+// Defaults to the sandbox/ next to this file; pass a target dir to write somewhere else.
+const SANDBOX_DIR = process.argv[2] ?? join(dirname(fileURLToPath(import.meta.url)), 'sandbox');
 
 // Fake log-style content — repetitive but not identical, so it doesn't compress to one token
 function generateEnglishLog(lines: number): string {

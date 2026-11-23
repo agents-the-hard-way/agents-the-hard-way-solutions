@@ -8,9 +8,10 @@ const client = new Anthropic();
 const SYSTEM_PROMPT =
   'You are an autonomous assistant. Complete tasks efficiently without asking for confirmation or over-explaining. Take direct action.';
 
-// --- Method A: local heuristic, zero network call ---
+const MODEL = 'claude-haiku-4-5-20251001';
+const CONTEXT_LIMIT = 200_000; // empirically confirmed via a real 400 error — see tokenCountingBefore.ts / WRITEUP.md
+
 function estimateTokensHeuristic(text: string): number {
-  // ~4 chars per token — rough approximation, worse for non-English languages
   return Math.ceil(text.length / 4);
 }
 
@@ -28,13 +29,12 @@ function estimateMessagesTokens(
   );
 }
 
-// --- Method B: countTokens() — exact, but requires a round-trip to the API ---
 async function getActualTokens(
   system: string,
   messages: Anthropic.MessageParam[],
 ): Promise<number> {
   const result = await client.messages.countTokens({
-    model: 'claude-haiku-4-5-20251001',
+    model: MODEL,
     system,
     tools,
     messages,
@@ -43,13 +43,13 @@ async function getActualTokens(
 }
 
 async function run() {
-  console.log('\n=== TOKEN COUNTING: heuristic vs actual ===');
+  console.log('\n=== TOKEN COUNTING: guarded (countTokens() checked before every create()) ===');
 
   const messages: Anthropic.MessageParam[] = [
     {
       role: 'user',
       content:
-        'Read all files in the lessons/04-token-counting/sandbox/ directory one by one and write a combined summary to lessons/04-token-counting/sandbox/summary.txt.',
+        'Read all files in the sandbox/ directory one by one and write a combined summary to sandbox/summary.txt.',
     },
   ];
 
@@ -62,8 +62,18 @@ async function run() {
       `[iteration ${i + 1}] heuristic: ${heuristic} | actual: ${actual} | error: ${errorPct}%`,
     );
 
+    // Same countTokens() call tokenCountingBefore.ts already makes every iteration — the only
+    // difference is actually acting on the number instead of just logging it.
+    if (actual > CONTEXT_LIMIT) {
+      console.warn(
+        `  [guard] actual tokens (${actual}) exceed the context limit (${CONTEXT_LIMIT}) — ` +
+          'stopping before create() instead of letting the API reject the request.',
+      );
+      break;
+    }
+
     const response = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
+      model: MODEL,
       max_tokens: 1024,
       system: SYSTEM_PROMPT,
       tools,

@@ -1,5 +1,10 @@
 # 01 — Token-level streaming
 
+> Author's write-up and answer key for this lesson. Read it after you have filled in
+> `../problem/NOTEBOOK.md` yourself. Hypotheses here were written before each run and
+> results are real output. Runs recorded before the problem/solution split used prompts
+> with repo-root paths (`lessons/NN-…/sandbox/…`) instead of `sandbox/…`.
+
 **Files:** `streamingBefore.ts` (before — blocking `messages.create()`),
 `streamingAfter.ts` (after — `messages.stream()`) — this folder
 
@@ -22,8 +27,8 @@ lesson 03 for why real files are off-limits for agent experiments).
 ## Run
 
 ```bash
-pnpm run lesson:01-before   # client.messages.create()
-pnpm run lesson:01-after    # client.messages.stream()
+pnpm lesson 01 before --solution   # client.messages.create()
+pnpm lesson 01 after --solution    # client.messages.stream()
 ```
 
 Both send the identical prompt, model, and tool definitions — the only

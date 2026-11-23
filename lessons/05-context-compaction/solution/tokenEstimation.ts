@@ -11,7 +11,7 @@ export const WARNING_THRESHOLD = CONTEXT_LIMIT * 0.9; // safety net — should n
 // summary itself came out larger than expected
 
 export const ORIGINAL_TASK_TEXT =
-  'Read all files in the lessons/05-context-compaction/sandbox/ directory one by one and write a combined summary to lessons/05-context-compaction/sandbox/summary.txt.';
+  'Read all files in the sandbox/ directory one by one and write a combined summary to sandbox/summary.txt.';
 
 // --- Method A: local heuristic, zero network call ---
 export function estimateTokensHeuristic(text: string): number {

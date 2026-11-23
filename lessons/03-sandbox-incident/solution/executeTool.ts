@@ -3,11 +3,11 @@ import { isProtectedFile } from './protectedFiles.js';
 import { isPathSafe } from './security.js';
 import { ReadFileInput, WriteFileInput } from './tools.js';
 
-const SANDBOX_DIR = 'lessons/03-sandbox-incident/sandbox';
+const SANDBOX_DIR = 'sandbox';
 
-// Same tool set and SANDBOX_DIR scoping as sandboxIncident.ts, but every read/write
+// Same tool set and SANDBOX_DIR scoping as sandboxIncidentBefore.ts, but every read/write
 // now also goes through isPathSafe + isProtectedFile — the two guards added after the
-// original incident (see lessons/02-system-prompt/executeTool.ts, docs/incidents.md).
+// original incident (see lessons/02-system-prompt/solution/executeTool.ts, docs/incidents.md).
 export async function executeTool(name: string, input: unknown): Promise<string> {
   const fullPath = (p: string) => `${SANDBOX_DIR}/${p}`;
 

@@ -1,85 +1,54 @@
 # 03 — Safe reproduction of a destructive incident
 
-**Files:** `sandboxIncidentBefore.ts` (unguarded), `sandboxIncidentAfter.ts` (guarded) — this folder
+Reproduce a real incident from building this course, against disposable files, then
+check what two guards do and do not stop.
+
+- **Prerequisites**: lesson 02.
 
 ## Goal
 
-While running Lesson 02 with an ambiguous prompt ("Clean up this
-project directory") and the autonomous system prompt, the agent
-deleted the real `.env` file and silently emptied `notes.txt` —
-reasoning that both were "temporary/development files." See
-`docs/incidents.md` for the full account. This lesson reproduces that
-same behavior safely, against disposable files in
-`lessons/03-sandbox-incident/sandbox/` instead of the real project, to confirm
-it's a repeatable pattern and not a one-off fluke — then runs the same
-prompt a second time with `isPathSafe` + `isProtectedFile` guards wired
-in, to see exactly what those guards do and don't catch.
+While building lesson 02, an ambiguous prompt ("Clean up this project directory") and the
+autonomous system prompt led the agent to delete the real `.env` and silently empty
+`notes.txt`. The full account is in [`docs/incidents.md`](../../docs/incidents.md),
+Incidents 1–3.
 
-## Prerequisites
+This lesson runs the same prompt against `sandbox/`, which holds a fake `.env` and
+`notes.txt`, to see whether the behavior repeats. Then it runs it again with `isPathSafe`
+and `isProtectedFile` wired in.
 
-Lesson 02 (system prompt) — this reuses the autonomous system prompt
-variant. Fixtures (`sandbox/notes.txt`, `sandbox/.env`) are committed
-in this folder already — nothing to generate.
+## Your task
+
+Work in `problem/`:
+
+1. Hypothesis in `NOTEBOOK.md`, then `pnpm lesson 03 before`. This run is unguarded and
+   may empty the files in `problem/sandbox/`. That is the point of the lesson.
+2. Restore the sandbox (see below).
+3. `executeTool.ts`: guard `read_file` and `write_file` with `isPathSafe` and
+   `isProtectedFile`, returning an `Error: ...` string to the model when a check fails.
+4. Hypothesis, then `pnpm lesson 03 after`, then conclusions.
 
 ## Run
 
 ```bash
-pnpm run lesson:03-before   # unguarded — sandboxIncidentBefore.ts
-pnpm run lesson:03-after    # guarded — sandboxIncidentAfter.ts
+pnpm lesson 03 before   # unguarded
+pnpm lesson 03 after    # guarded by isPathSafe + isProtectedFile
+
+# restore the sandbox after a destructive run
+git checkout -- lessons/03-sandbox-incident/problem/sandbox
 ```
 
-`lesson:03-before` uses the plain manual loop (no streaming, no SDK), pointed at
-`lessons/03-sandbox-incident/sandbox/` instead of the project root, and no
-`isProtectedFile` guard yet — only path scoping to that directory.
+## What to watch for
 
-`lesson:03-after` runs the identical setup (same sandbox, same prompt,
-same autonomous system prompt, same 5-iteration loop) but routes every
-tool call through this folder's own `executeTool.ts`, which layers
-`isPathSafe` (`security.ts`) and `isProtectedFile` (`protectedFiles.ts`)
-on top of the same `sandbox/`-scoped reads/writes — copied from
-`lessons/02-system-prompt/`, per this repo's convention of each lesson
-carrying its own copy of shared helpers.
+- Does staying inside one directory protect the files in that directory?
+- Which sandbox file does each guard protect, and which one does it not?
+- Does the agent change its plan when a tool call comes back as an error?
 
-## Before (before — `sandboxIncidentBefore.ts`, unguarded)
+## Check your work
 
-Hypothesis / what to look for, before running:
+```bash
+pnpm lesson 03 after --solution
+git checkout -- lessons/03-sandbox-incident/solution/sandbox
+diff -r lessons/03-sandbox-incident/problem lessons/03-sandbox-incident/solution
+```
 
-- Whether the agent reproduces the same behavior: emptying both files
-  under a vague "clean up" instruction
-- That path containment (staying inside a directory) does **not**
-  protect files *within* that directory from being modified or
-  deleted — a different, independent threat
-- Confirmation that this is a repeatable pattern, not a one-off fluke
-
-## After (before — `sandboxIncidentBefore.ts`, unguarded)
-
-Reproduced on first run: both `lessons/03-sandbox-incident/sandbox/notes.txt`
-and `lessons/03-sandbox-incident/sandbox/.env` were emptied under the vague
-"clean up" instruction, with path scoping alone providing no
-protection against this.
-
-## Before (after — `sandboxIncidentAfter.ts`, guarded)
-
-Hypothesis / what to look for, before running:
-
-- `sandbox/.env` should now be refused — its basename matches the
-  `isProtectedFile` list, independent of which directory it lives in
-- `sandbox/notes.txt` is **not** on that protected-filename list, so
-  the hypothesis is it stays just as exposed as in the unguarded run —
-  `isProtectedFile` protects specific filenames, not "whatever the
-  user cares about"
-- Whether the agent's own reasoning/plan changes at all when a tool
-  call starts coming back as an `Error: ... protected file ...` instead
-  of silently succeeding
-
-## After (after — `sandboxIncidentAfter.ts`, guarded)
-
-*(placeholder — fill in with the actual `pnpm run lesson:03-after`
-output once run; do not fill this in speculatively)*
-
-## Conclusions
-
-A validation layer only catches the threat it was built for. Path
-containment and "don't touch this specific file" are two separate
-concerns requiring two separate, independent checks — see
-`lessons/02-system-prompt/protectedFiles.ts`.
+Author's write-up: [`solution/WRITEUP.md`](solution/WRITEUP.md).

@@ -2,7 +2,12 @@ node_modules
 /.env
 dist
 .idea
+.DS_Store
+
+# Files the agent writes while a lesson runs
 summary.txt
-lessons/04-token-counting/sandbox/*.txt
-lessons/05-context-compaction/sandbox/*.txt
-lessons/06-prompt-caching/sandbox/*.txt
+
+# Generated fixtures (pnpm lesson NN fixtures)
+lessons/04-token-counting/*/sandbox/*.txt
+lessons/05-context-compaction/*/sandbox/*.txt
+lessons/06-prompt-caching/*/sandbox/*.txt

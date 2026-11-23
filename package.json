@@ -1,23 +1,19 @@
 {
-  "name": "agentWithoutGuardrails",
+  "name": "agents-the-hard-way",
   "version": "1.0.0",
+  "private": true,
+  "description": "Hand-built Claude agent loops on the raw Messages API, no SDK abstractions.",
+  "license": "MIT",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
+    "lesson": "tsx scripts/lesson.ts",
+    "verify": "biome ci . && tsc --noEmit",
     "format": "biome format --write .",
     "lint": "biome lint .",
-    "check": "biome check --write .",
-    "lesson:01-before": "tsx lessons/01-streaming/streamingBefore.ts",
-    "lesson:01-after": "tsx lessons/01-streaming/streamingAfter.ts",
-    "lesson:02-before": "tsx lessons/02-system-prompt/systemPromptBefore.ts",
-    "lesson:02-after": "tsx lessons/02-system-prompt/systemPromptAfter.ts",
-    "lesson:03-before": "tsx lessons/03-sandbox-incident/sandboxIncidentBefore.ts",
-    "lesson:03-after": "tsx lessons/03-sandbox-incident/sandboxIncidentAfter.ts",
-    "lesson:04-before": "tsx lessons/04-token-counting/tokenCountingBefore.ts",
-    "lesson:04-after": "tsx lessons/04-token-counting/tokenCountingAfter.ts",
-    "lesson:05-before": "tsx lessons/05-context-compaction/contextWindowManagementBefore.ts",
-    "lesson:05-after": "tsx lessons/05-context-compaction/contextWindowManagementAfter.ts",
-    "lesson:06-before": "tsx lessons/06-prompt-caching/promptCachingBefore.ts",
-    "lesson:06-after": "tsx lessons/06-prompt-caching/promptCachingAfter.ts"
+    "check": "biome check --write ."
   },
   "packageManager": "pnpm@10.33.0",
   "dependencies": {

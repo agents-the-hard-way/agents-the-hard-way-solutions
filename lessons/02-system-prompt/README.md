@@ -1,69 +1,62 @@
 # 02 — System prompt as a behavior lever
 
-**Files:** `systemPromptBefore.ts` (cautious, explain-first prompt),
-`systemPromptAfter.ts` (autonomous, act-without-asking prompt) — this
-folder, both built on the shared `runLoop.ts`
+Build your first full tool-use loop, then run the same task under two different system
+prompts.
+
+- **Prerequisites**: lesson 01.
 
 ## Goal
 
-Show that the same tool definitions and the same user prompt can
-produce different **decisions** — not just different wording —
-depending only on the `system` field sent with the request.
+Show that the same tools and the same user prompt can lead to different **decisions**,
+not only different wording, depending only on the `system` field sent with the request.
 
-## Prerequisites
+Lesson 01 never executed a tool call. Here the agent really reads and writes files, so
+this lesson also introduces `executeTool.ts` and two guards: `isPathSafe` (`security.ts`)
+keeps paths inside the lesson folder, and `isProtectedFile` (`protectedFiles.ts`) refuses
+`.env` and similar files. Why there are two separate guards is in
+[`docs/incidents.md`](../../docs/incidents.md).
 
-Lesson 01 (streaming) understood — this lesson reuses the plain
-request/response loop, no streaming involved.
+## Your task
+
+Work in `problem/`:
+
+1. `runLoop.ts`: close the loop. After the model asks for tools, run each call through
+   `executeTool()` and send the results back as `tool_result` blocks. Until you do, the
+   loop stops after the first tool request.
+2. Write your first hypothesis in `NOTEBOOK.md`, then run `pnpm lesson 02 before`
+   (cautious system prompt).
+3. `systemPromptAfter.ts`: write an autonomous system prompt (act directly, no
+   confirmation, no explanations). Hypothesis first, then `pnpm lesson 02 after`.
+4. Write your conclusions.
+
+The task is "read `sandbox/notes.txt`, write a summary to `sandbox/summary.txt`". The
+summary file is created when you run the lesson and is not committed.
 
 ## Run
 
 ```bash
-pnpm run lesson:02-before   # cautious, explain-first system prompt
-pnpm run lesson:02-after    # autonomous, act-without-asking system prompt
+pnpm lesson 02 before   # cautious, explain-first system prompt
+pnpm lesson 02 after    # autonomous, act-without-asking system prompt
 ```
 
-Each sends the identical task ("read notes.txt, write a summary")
-through the same manual loop, changing only `system`. The task
-targets this lesson's own `sandbox/notes.txt` (committed in this
-folder) instead of the real project `notes.txt` — the same real-file
-exposure that caused Incidents 1-2 in `docs/incidents.md` (see
-`lessons/03-sandbox-incident/`), now closed off here too.
-`sandbox/summary.txt` is written and read back when run, not committed.
+## What to watch for
 
-## Before (before — `systemPromptBefore.ts`, cautious system prompt)
+- Which tools each variant calls, and in what order.
+- How much text comes before each tool call.
+- How many iterations each needs to finish the same task.
+- How you would expect each prompt to behave on a vaguer task, such as
+  "clean up this directory". Lesson 03 tests exactly that.
 
-Hypothesis / what to look for, before running:
+## Check your work
 
-- More text precedes each tool call than in the autonomous variant
-- The model calls extra tools (e.g. `list_files`) to "understand
-  context" before acting
-- More iterations than the autonomous variant to finish the same task
+```bash
+pnpm lesson 02 after --solution
+diff -r lessons/02-system-prompt/problem lessons/02-system-prompt/solution
+```
 
-## After (before — `systemPromptBefore.ts`, cautious system prompt)
+Author's write-up: [`solution/WRITEUP.md`](solution/WRITEUP.md).
 
-The cautious variant called `list_files` first and narrated its plan
-before writing.
+## Reference
 
-## Before (after — `systemPromptAfter.ts`, autonomous system prompt)
-
-Hypothesis / what to look for, before running:
-
-- Goes straight to the write, with little or no explanatory text
-- Fewer iterations than the cautious variant to finish the same task
-- With an ambiguous instruction (e.g. "clean up this directory"
-  instead of a precise one) instead of this lesson's precise one, this
-  variant can diverge sharply — including into destructive territory.
-  See `lessons/03-sandbox-incident/README.md`.
-
-## After (after — `systemPromptAfter.ts`, autonomous system prompt)
-
-The autonomous variant went straight to the write with no explanation.
-Iteration count was lower than the cautious variant, at the cost of
-legibility.
-
-## Conclusions
-
-The system prompt shapes the agent's *plan*, not just its tone. The
-effect is small on precise, single-path tasks and can be large on
-ambiguous ones — because ambiguity is exactly where the model falls
-back on whatever the system prompt told it about how to behave.
+- [Tool use overview](https://docs.claude.com/en/docs/agents-and-tools/tool-use/overview)
+- [System prompts](https://docs.claude.com/en/docs/build-with-claude/prompt-engineering/system-prompts)

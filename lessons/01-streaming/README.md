@@ -1,70 +1,56 @@
 # 01 — Token-level streaming
 
-**Files:** `streamingBefore.ts` (before — blocking `messages.create()`),
-`streamingAfter.ts` (after — `messages.stream()`) — this folder
+Send the same request to Claude twice, with `messages.create()` and with
+`messages.stream()`, and compare how the response arrives.
+
+- **Prerequisites**: [00 — Setup](../00-setup/README.md).
+- **Cost**: well under one US cent.
+- **Time**: about 30 minutes.
 
 ## Goal
 
-See that Claude does not generate a response all at once — it streams
-token by token, and tool arguments arrive as fragmented, partial JSON
-that must be reassembled. `messages.create()` does this same work
-internally; it just waits for the stream to finish before returning —
-which is exactly what this lesson compares directly.
+Claude does not produce a response all at once. It generates it token by token, and a
+tool call's arguments are generated the same way: as fragments of JSON. `messages.create()`
+does that same work internally and only returns once it is finished. This lesson makes
+the difference visible.
 
-## Prerequisites
+## Your task
 
-None — first lesson in the sequence. Uses its own `sandbox/notes.txt`
-fixture (committed in this folder) rather than a real project file —
-this lesson never actually executes the tool call it streams, but it's
-sandboxed anyway to keep the convention consistent across lessons (see
-lesson 03 for why real files are off-limits for agent experiments).
+Work in `problem/`:
+
+1. Read `streamingBefore.ts`, `streamingAfter.ts` and `tools.ts`. Both scripts send the
+   same prompt, model and tools; only the SDK call differs.
+2. Write your first hypothesis in `problem/NOTEBOOK.md`, then run `pnpm lesson 01 before`.
+3. Write the second hypothesis, then fill in the `TODO` in `streamingAfter.ts` and run
+   `pnpm lesson 01 after`.
+4. Write your conclusions.
+
+The prompt only mentions `sandbox/notes.txt`. Neither script executes the tool call; they
+print what Claude sends back.
 
 ## Run
 
 ```bash
-pnpm run lesson:01-before   # client.messages.create()
-pnpm run lesson:01-after    # client.messages.stream()
+pnpm lesson 01 before   # client.messages.create()
+pnpm lesson 01 after    # client.messages.stream()
 ```
 
-Both send the identical prompt, model, and tool definitions — the only
-difference is whether the SDK call is blocking or streaming.
+## What to watch for
 
-## Before (before — `streamingBefore.ts`)
+- When does the first output appear in each run?
+- How do the tool call's arguments arrive in the streamed run?
+- How does what `finalMessage()` returns compare with the `create()` result?
 
-Hypothesis / what to look for, before running:
+## Check your work
 
-- A single blocking call returns one complete `message.content` —
-  no intermediate output, no visibility into generation as it happens
-- The final shape of `message.content` should be identical to what
-  streaming's `finalMessage()` assembles, just arrived at without any
-  of the intermediate events
+```bash
+pnpm lesson 01 after --solution
+diff -r lessons/01-streaming/problem lessons/01-streaming/solution
+```
 
-## After (before — `streamingBefore.ts`)
+The author's hypotheses, results and conclusions are in
+[`solution/WRITEUP.md`](solution/WRITEUP.md).
 
-Confirmed: `messages.create()` returns nothing until the full response
-(including any tool-call JSON) is generated — stdout prints only the
-final `message.content`, with no partial text or partial-JSON visible
-at any point before that.
+## Reference
 
-## Before (after — `streamingAfter.ts`)
-
-Hypothesis / what to look for, before running:
-
-- `text` events firing token-by-token before any tool call
-- `input_json_delta` events showing a tool's JSON arguments arriving in
-  broken pieces (e.g. `{"pat`, `h": "note`, `s.txt"}`)
-- `finalMessage()` assembling everything into the same shape as the
-  non-streamed response from `streamingBefore.ts`
-
-## After (after — `streamingAfter.ts`)
-
-Confirmed: text streamed token-by-token, tool-call JSON arrived in
-fragments and had to be reassembled, and `finalMessage()` produced a
-result shape identical to the non-streamed `messages.create()` call
-in `streamingBefore.ts`.
-
-## Conclusions
-
-Streaming isn't a different API contract, it's the same contract
-observed incrementally — worth knowing before building anything (e.g.
-a UI) that needs to react to partial output.
+- [Streaming messages](https://docs.claude.com/en/docs/build-with-claude/streaming)

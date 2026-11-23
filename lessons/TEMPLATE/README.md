@@ -1,67 +1,48 @@
 # NN — <Lesson title>
 
-**Files:** `<name>Before.ts` (naive/unguarded/unoptimized), `<name>After.ts`
-(fix/guard/optimization applied) — this folder. If both variants share
-heavy setup, factor it into a local helper both import (e.g.
-`lessons/05-context-compaction/tokenEstimation.ts`) rather than
-duplicating it across the two files.
+One sentence: what the learner does in this lesson.
+
+- **Prerequisites**: lesson NN-1, plus anything else that must already be set up.
+- **Cost**: include this line when a run costs more than a few cents.
 
 ## Goal
 
-What this lesson is trying to find out or build, and why — usually
-motivated by a gap or open question left by the previous lesson.
+What this lesson investigates or builds, and why. Usually motivated by a gap or open
+question left by the previous lesson. No results here: they belong in
+`solution/WRITEUP.md`.
 
-## Prerequisites
+## Your task
 
-What must already be true or set up before running this: earlier
-lessons, generated fixtures, environment variables. If this lesson
-needs fixtures, generate them into `sandbox/` inside this same folder
-— never point at another lesson's folder or a shared top-level one.
+Work in `problem/`:
+
+1. Generate fixtures, if the lesson has any: `pnpm lesson NN fixtures`.
+2. Hypothesis in `NOTEBOOK.md`, then `pnpm lesson NN before`.
+3. Fill in the `TODO` in `<file>.ts`: one sentence on what it must do.
+4. Hypothesis, then `pnpm lesson NN after`, then conclusions.
 
 ## Run
 
 ```bash
-pnpm run lesson:NN-before   # naive/unguarded
-pnpm run lesson:NN-after    # fix/guard/optimization applied
+pnpm lesson NN before   # naive/unguarded/unoptimized
+pnpm lesson NN after    # fix/guard/optimization applied
 ```
 
-Describe what actually differs between the two runs (same task, same
-loop — only the one thing under test changes).
+Same task, same loop: only the one thing under test changes between the two runs.
 
-## Before (before/naive/unguarded — `<scriptBefore>.ts`)
+## What to watch for
 
-Hypothesis — write this **before** you run anything, not after:
+Questions that point at the interesting part of the output, without giving away the
+answer.
 
-- What you expect to happen
-- What you're specifically watching for in the output
+## Check your work
 
-## After (before/naive/unguarded — `<scriptBefore>.ts`)
+```bash
+pnpm lesson NN after --solution
+diff -r lessons/NN-<slug>/problem lessons/NN-<slug>/solution
+```
 
-What actually happened. Real output, real numbers — never invented
-ones. If it didn't work as expected, say so plainly and explain why;
-a documented failure with root-cause analysis is a valid, often more
-valuable outcome than a clean success (see lesson 05). If it produced
-a real incident, log it in `docs/incidents.md` and reference it here.
+Author's write-up: [`solution/WRITEUP.md`](solution/WRITEUP.md).
 
-## Before (after — `<scriptAfter>.ts`)
+## Reference
 
-Hypothesis for the fixed/guarded/optimized variant, written before
-running it — usually "this should no longer reproduce the failure
-above" plus what specifically should differ in the output.
-
-## After (after — `<scriptAfter>.ts`)
-
-Real, observed output for the fixed/guarded/optimized variant — never
-invented. Say plainly if it only partially fixes the problem, or fixes
-it in a way that introduces a new, different gap (see lesson 03:
-`isProtectedFile` blocks `.env` but not `notes.txt`).
-
-## Conclusions
-
-What this proves or disproves, comparing both runs directly. Numbered
-list preferred over prose — easier to carry forward into later lessons.
-
-## Next
-
-What this motivates for the next lesson, if anything. Delete this
-section if there's no clear follow-up.
+- Links to the relevant Claude API docs.

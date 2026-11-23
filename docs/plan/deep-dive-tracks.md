@@ -29,7 +29,7 @@ Scope: extensions to the main curriculum (lessons 04–13, Stages 2–4) aimed a
 - Model budget: ~7–9B at Q4 as the default; ~12–14B at Q4 with short context for comparisons; nothing above ~20B.
 - Pick models tagged `tools` on ollama.com. Polish-language reference model: Bielik 11B v3 (verify `tools` support before O4).
 - Keep Ollama up to date (`brew upgrade ollama`); recent versions run MLX-supported models on Apple Silicon by default.
-- Code: `src/lessons/ollama/`. Docs: `docs/lessons/ollama-0N-*.md`.
+- Location: `tracks/ollama/NN-<slug>/`, same `README.md` + `problem/` + `solution/` layout as `lessons/` (see `AGENTS.md`).
 
 ### Environment — verified as of 2026-10-04
 

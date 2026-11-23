@@ -1,0 +1,16 @@
+{
+  "name": "Agents the Hard Way",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:22",
+  "postCreateCommand": "corepack enable && pnpm install",
+  "secrets": {
+    "ANTHROPIC_API_KEY": {
+      "description": "Your own Anthropic API key. Most lessons cost a few cents or less; see each lesson's README.",
+      "documentationUrl": "https://console.anthropic.com/settings/keys"
+    }
+  },
+  "customizations": {
+    "codespaces": {
+      "openFiles": ["lessons/00-setup/README.md"]
+    }
+  }
+}

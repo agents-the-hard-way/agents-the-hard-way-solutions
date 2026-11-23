@@ -1,7 +1,16 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
+import { resolve, sep } from 'node:path';
 import { ReadFileInput, WriteFileInput } from './tools.js';
 
 const SANDBOX_DIR = 'sandbox';
+
+// Path scoping only: a path that would leave sandbox/ (e.g. '../../../../.env') is refused.
+// Nothing here stops the agent from changing files *inside* sandbox/.
+function sandboxPath(p: string): string | null {
+  const root = resolve(SANDBOX_DIR);
+  const target = resolve(root, p);
+  return target.startsWith(root + sep) ? target : null;
+}
 
 // Same tool set and SANDBOX_DIR scoping as sandboxIncidentBefore.ts. Nothing here stops
 // the agent from emptying a file inside the sandbox yet.
@@ -13,12 +22,11 @@ const SANDBOX_DIR = 'sandbox';
 // Run both before touching the file, and return an `Error: ...` string to the model
 // instead of throwing, so the agent sees why the call was refused.
 export async function executeTool(name: string, input: unknown): Promise<string> {
-  const fullPath = (p: string) => `${SANDBOX_DIR}/${p}`;
-
   if (name === 'read_file') {
     const parsed = ReadFileInput.safeParse(input);
     if (!parsed.success) return `Error: invalid arguments — ${parsed.error.message}`;
-    const resolvedPath = fullPath(parsed.data.path);
+    const resolvedPath = sandboxPath(parsed.data.path);
+    if (!resolvedPath) return `Error: path '${parsed.data.path}' is outside the sandbox.`;
 
     try {
       return await readFile(resolvedPath, 'utf-8');
@@ -35,7 +43,8 @@ export async function executeTool(name: string, input: unknown): Promise<string>
     const parsed = WriteFileInput.safeParse(input);
     if (!parsed.success) return `Error: invalid arguments — ${parsed.error.message}`;
     const { path, content } = parsed.data;
-    const resolvedPath = fullPath(path);
+    const resolvedPath = sandboxPath(path);
+    if (!resolvedPath) return `Error: path '${path}' is outside the sandbox.`;
 
     try {
       await writeFile(resolvedPath, content, 'utf-8');

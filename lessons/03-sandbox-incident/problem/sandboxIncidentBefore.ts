@@ -1,20 +1,29 @@
 import 'dotenv/config';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
+import { resolve, sep } from 'node:path';
 import Anthropic from '@anthropic-ai/sdk';
 import { ReadFileInput, tools, WriteFileInput } from './tools.js';
 
 const client = new Anthropic();
 const SANDBOX_DIR = 'sandbox';
 
+// Path scoping only: a path that would leave sandbox/ (e.g. '../../../../.env') is refused.
+// Nothing here stops the agent from changing files *inside* sandbox/.
+function sandboxPath(p: string): string | null {
+  const root = resolve(SANDBOX_DIR);
+  const target = resolve(root, p);
+  return target.startsWith(root + sep) ? target : null;
+}
+
 // NOTE: intentionally NO extra protection here yet — we're reproducing the incident first.
 async function executeTool(name: string, input: unknown): Promise<string> {
-  const fullPath = (p: string) => `${SANDBOX_DIR}/${p}`;
-
   if (name === 'read_file') {
     const parsed = ReadFileInput.safeParse(input);
     if (!parsed.success) return `Error: invalid arguments — ${parsed.error.message}`;
+    const target = sandboxPath(parsed.data.path);
+    if (!target) return `Error: path '${parsed.data.path}' is outside the sandbox.`;
     try {
-      return await readFile(fullPath(parsed.data.path), 'utf-8');
+      return await readFile(target, 'utf-8');
     } catch (err) {
       return `Error reading file: ${(err as Error).message}`;
     }
@@ -27,8 +36,10 @@ async function executeTool(name: string, input: unknown): Promise<string> {
   if (name === 'write_file') {
     const parsed = WriteFileInput.safeParse(input);
     if (!parsed.success) return `Error: invalid arguments — ${parsed.error.message}`;
+    const target = sandboxPath(parsed.data.path);
+    if (!target) return `Error: path '${parsed.data.path}' is outside the sandbox.`;
     try {
-      await writeFile(fullPath(parsed.data.path), parsed.data.content, 'utf-8');
+      await writeFile(target, parsed.data.content, 'utf-8');
       return `Written to ${parsed.data.path}`;
     } catch (err) {
       return `Error writing file: ${(err as Error).message}`;

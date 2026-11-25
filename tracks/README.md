@@ -17,7 +17,7 @@ requirements as `lessons/NN-<slug>/`: a task `README.md`, a `problem/` folder an
 | O4 | Loop portability / provider adapter | Stage 1 loop, O1–O3 | planned |
 | T1 | llama.cpp (GGUF, quantization, grammars) | O1 | planned |
 | T2 | Raw MCP (JSON-RPC over stdio/HTTP) | Lesson 10 | planned |
-| T3 | Sandboxing & process isolation | Stage 1 loop | planned |
+| T3 | Sandboxing & process isolation (incl. symlink escape, Incident 7) | Stage 1 loop | planned |
 | T4 | Observability (OpenTelemetry) | Stage 1 loop | planned |
 | T5 | pgvector / embeddings | — (Stage 3–4 project) | planned |
 | T6 | Temporal / durable execution | — (Stage 3–4 project) | planned |

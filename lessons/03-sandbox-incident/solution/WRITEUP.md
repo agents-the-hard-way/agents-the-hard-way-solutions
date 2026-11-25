@@ -88,3 +88,8 @@ A validation layer only catches the threat it was built for. Path
 containment and "don't touch this specific file" are two separate
 concerns requiring two separate, independent checks — see
 `lessons/02-system-prompt/solution/protectedFiles.ts`.
+
+The unguarded variant's own path scoping had two gaps of its own, `..` and then
+symlinks, both found in review and fixed in `sandboxPath()`. `isPathSafe` still has
+the symlink gap on purpose. See `docs/incidents.md`, Incident 7, and the symlink-escape
+exercise planned for track T3.

@@ -34,7 +34,7 @@ const args = process.argv.slice(2);
 const useSolution = args.includes('--solution');
 const [lessonNumber, entryPoint] = args.filter((arg) => !arg.startsWith('--'));
 
-if (!lessonNumber || !entryPoint || !(entryPoint in ENTRY_POINTS)) usage();
+if (!lessonNumber || !entryPoint || !Object.hasOwn(ENTRY_POINTS, entryPoint)) usage();
 
 const lessonName = readdirSync(LESSONS_DIR).find((name) =>
   name.startsWith(`${lessonNumber.padStart(2, '0')}-`),

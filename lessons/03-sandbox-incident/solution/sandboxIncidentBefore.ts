@@ -1,20 +1,38 @@
 import 'dotenv/config';
-import { readdir, readFile, writeFile } from 'node:fs/promises';
+import { lstat, readdir, readFile, realpath, writeFile } from 'node:fs/promises';
+import { basename, dirname, join, resolve, sep } from 'node:path';
 import Anthropic from '@anthropic-ai/sdk';
 import { ReadFileInput, tools, WriteFileInput } from './tools.js';
 
 const client = new Anthropic();
 const SANDBOX_DIR = 'sandbox';
 
+// Path scoping only: a path that would leave sandbox/ (e.g. '../../../../.env') is refused.
+// Nothing here stops the agent from changing files *inside* sandbox/.
+async function sandboxPath(p: string): Promise<string | null> {
+  const root = await realpath(SANDBOX_DIR);
+  const target = resolve(root, p);
+  if (!target.startsWith(root + sep)) return null;
+  // A symlink inside sandbox/ could still point outside it: check where the parent
+  // directory really is, and refuse the file itself if it is a symlink.
+  const parent = await realpath(dirname(target)).catch(() => null);
+  if (!parent || (parent !== root && !parent.startsWith(root + sep))) return null;
+  const isSymlink = await lstat(target).then(
+    (stats) => stats.isSymbolicLink(),
+    () => false,
+  );
+  return isSymlink ? null : join(parent, basename(target));
+}
+
 // NOTE: intentionally NO extra protection here yet — we're reproducing the incident first.
 async function executeTool(name: string, input: unknown): Promise<string> {
-  const fullPath = (p: string) => `${SANDBOX_DIR}/${p}`;
-
   if (name === 'read_file') {
     const parsed = ReadFileInput.safeParse(input);
     if (!parsed.success) return `Error: invalid arguments — ${parsed.error.message}`;
+    const target = await sandboxPath(parsed.data.path);
+    if (!target) return `Error: path '${parsed.data.path}' is outside the sandbox.`;
     try {
-      return await readFile(fullPath(parsed.data.path), 'utf-8');
+      return await readFile(target, 'utf-8');
     } catch (err) {
       return `Error reading file: ${(err as Error).message}`;
     }
@@ -27,8 +45,10 @@ async function executeTool(name: string, input: unknown): Promise<string> {
   if (name === 'write_file') {
     const parsed = WriteFileInput.safeParse(input);
     if (!parsed.success) return `Error: invalid arguments — ${parsed.error.message}`;
+    const target = await sandboxPath(parsed.data.path);
+    if (!target) return `Error: path '${parsed.data.path}' is outside the sandbox.`;
     try {
-      await writeFile(fullPath(parsed.data.path), parsed.data.content, 'utf-8');
+      await writeFile(target, parsed.data.content, 'utf-8');
       return `Written to ${parsed.data.path}`;
     } catch (err) {
       return `Error writing file: ${(err as Error).message}`;

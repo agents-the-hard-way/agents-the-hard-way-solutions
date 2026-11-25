@@ -149,6 +149,10 @@ Verification: own client talks to a third-party MCP server, and own server works
 
 Focus: how Claude Code isolates processes (`sandbox-exec`/Seatbelt on macOS, bubblewrap on Linux); rootless containers; gVisor; Firecracker microVMs.
 Exercise: run the Stage 1 loop's tool executor inside an OS-level sandbox that only allows writes to `sandbox/`, then disable `isPathSafe` and show the OS layer still blocks the `.env` write.
+Exercise — symlink escape (see `docs/incidents.md`, Incident 7):
+1. Before: in the lesson's own folder, put a fake secret in `outside/secret.txt` (never a real file) and a symlink `sandbox/link -> ../outside/secret.txt`. Show that `isPathSafe` from lessons 02–05 accepts `read_file('sandbox/link')` and `write_file` through a dangling link, and the agent reads or creates files outside `sandbox/`.
+2. After, application layer: make the check filesystem-aware (`realpath()` of the parent, refuse symlinked targets) and show both cases are refused. Note the gap that remains between the check and the I/O.
+3. After, OS layer: run the original, string-only `isPathSafe` inside the OS-level sandbox and show the escape is blocked anyway.
 Rationale: application-level checks fail when the code has a bug; the system layer does not depend on it.
 
 ### T4 — Observability with OpenTelemetry

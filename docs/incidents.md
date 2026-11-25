@@ -173,3 +173,49 @@ semantic continuity doesn't just risk losing detail — it can make the agent
 forget it did anything at all, turning a token-limit problem (crash) into an
 infinite-loop problem (silent non-termination). Token count alone is not a
 sufficient health metric for compaction; task progress needs its own check.
+
+## Incident 7: Path checks that only compare strings can be escaped with `..` and symlinks
+
+**Date**: 2026-11-23
+**Context**: code review of the problem/solution restructure (PRs #13 and #14),
+lesson 03 and the `isPathSafe` guard in lessons 02–05. **Found in review, not
+triggered by an agent run.** No real file was read or changed.
+
+**What happened**:
+Two escapes from `sandbox/` were found in review, one after the other:
+
+1. Lesson 03's unguarded tools (`sandboxIncidentBefore.ts`, and the unfinished
+   `problem/executeTool.ts`) built paths by joining strings: `` `sandbox/${p}` ``.
+   A tool call with `path: '../../../../.env'` would have reached the
+   repository's real `.env`, which holds the learner's API key. The write-up
+   described this code as "path scoping only", but nothing enforced the scope.
+2. The fix for (1) resolved the path and checked that it still started with
+   the sandbox directory. That check is still only a string comparison: a
+   symlink inside `sandbox/` that points outside it passes the check, and
+   `readFile`/`writeFile` follow the link. A dangling link is worse:
+   `writeFile` creates its target, outside the sandbox.
+
+**Root cause**:
+Both checks reason about the *text* of a path, while the filesystem decides
+where I/O actually lands. `resolve()` collapses `..` but knows nothing about
+symlinks. The same blind spot is still in `isPathSafe` (`security.ts`) in
+lessons 02–05, which uses `resolve()` + `relative()` against the working
+directory.
+
+**Fix**:
+- Lesson 03's unguarded tools now use `sandboxPath()`: resolve the path, check
+  it lexically, then `realpath()` the parent directory, require that to be
+  inside the real sandbox, and refuse the target if `lstat()` says it is a
+  symlink. Checked against real symlinks to a file, to a directory, and a
+  dangling one.
+- **Not fixed on purpose:** `isPathSafe` in lessons 02–05. It is the guard the
+  course teaches, and its limit is part of the material. It is the subject of
+  the symlink-escape exercise in track T3 (`docs/plan/deep-dive-tracks.md`).
+
+**Lesson**:
+A path check is only as good as its model of the filesystem. Comparing
+strings catches `..` once you resolve them, but not symlinks; checking
+`realpath()` catches symlinks that already exist, but still leaves a gap
+between the check and the I/O (time of check vs time of use). That gap is
+why an OS-level sandbox, which enforces the boundary at the moment of I/O,
+is the layer that does not depend on getting the application check right.

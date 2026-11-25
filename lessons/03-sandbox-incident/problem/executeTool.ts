@@ -1,15 +1,24 @@
-import { readdir, readFile, writeFile } from 'node:fs/promises';
-import { resolve, sep } from 'node:path';
+import { lstat, readdir, readFile, realpath, writeFile } from 'node:fs/promises';
+import { basename, dirname, join, resolve, sep } from 'node:path';
 import { ReadFileInput, WriteFileInput } from './tools.js';
 
 const SANDBOX_DIR = 'sandbox';
 
 // Path scoping only: a path that would leave sandbox/ (e.g. '../../../../.env') is refused.
 // Nothing here stops the agent from changing files *inside* sandbox/.
-function sandboxPath(p: string): string | null {
-  const root = resolve(SANDBOX_DIR);
+async function sandboxPath(p: string): Promise<string | null> {
+  const root = await realpath(SANDBOX_DIR);
   const target = resolve(root, p);
-  return target.startsWith(root + sep) ? target : null;
+  if (!target.startsWith(root + sep)) return null;
+  // A symlink inside sandbox/ could still point outside it: check where the parent
+  // directory really is, and refuse the file itself if it is a symlink.
+  const parent = await realpath(dirname(target)).catch(() => null);
+  if (!parent || (parent !== root && !parent.startsWith(root + sep))) return null;
+  const isSymlink = await lstat(target).then(
+    (stats) => stats.isSymbolicLink(),
+    () => false,
+  );
+  return isSymlink ? null : join(parent, basename(target));
 }
 
 // Same tool set and SANDBOX_DIR scoping as sandboxIncidentBefore.ts. Nothing here stops
@@ -25,7 +34,7 @@ export async function executeTool(name: string, input: unknown): Promise<string>
   if (name === 'read_file') {
     const parsed = ReadFileInput.safeParse(input);
     if (!parsed.success) return `Error: invalid arguments — ${parsed.error.message}`;
-    const resolvedPath = sandboxPath(parsed.data.path);
+    const resolvedPath = await sandboxPath(parsed.data.path);
     if (!resolvedPath) return `Error: path '${parsed.data.path}' is outside the sandbox.`;
 
     try {
@@ -43,7 +52,7 @@ export async function executeTool(name: string, input: unknown): Promise<string>
     const parsed = WriteFileInput.safeParse(input);
     if (!parsed.success) return `Error: invalid arguments — ${parsed.error.message}`;
     const { path, content } = parsed.data;
-    const resolvedPath = sandboxPath(path);
+    const resolvedPath = await sandboxPath(path);
     if (!resolvedPath) return `Error: path '${path}' is outside the sandbox.`;
 
     try {
